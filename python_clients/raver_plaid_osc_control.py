@@ -19,6 +19,7 @@ Then run this script in another shell to send colors to the simulator
 """
 
 from __future__ import division
+import argparse
 import time
 import math
 import sys
@@ -33,39 +34,31 @@ from pythonosc import dispatcher
 from pythonosc import osc_server
 
 #-------------------------------------------------------------------------------
-# handle command line
+# Process command line args
 
-if len(sys.argv) == 1:
-    IP_PORT = '127.0.0.1:7890'
-elif len(sys.argv) == 2 and ':' in sys.argv[1] and not sys.argv[1].startswith('-'):
-    IP_PORT = sys.argv[1]
-else:
-    print("""
-    Usage: raver_plaid.py [ip:port]
-    If not set, ip:port defauls to 127.0.0.1:7890
-    """)
-    sys.exit(0)
-
+parser = argparse.ArgumentParser(description='An OSC server which sends RGB values to an OPC server')
+parser.add_argument('--listen_ip', default='0.0.0.0', help='')
+parser.add_argument('--listen_port', default=5006, help='')
+parser.add_argument('--send_ip', default='0.0.0.0', help='')
+parser.add_argument('--send_port', default='7890', help='')
+parser.add_argument('--pixel_count', default=512, help='')
+parser.add_argument('--fps', default=24, help='')
+args = parser.parse_args()
 
 #-------------------------------------------------------------------------------
-# connect to server
-
-client = opc.Client(IP_PORT)
+# Connect to OPC server
+OPC_IP_PORT = "%s:%s" % (args.send_ip, args.send_port)
+client = opc.Client(OPC_IP_PORT)
 if client.can_connect():
-    print('connected to %s' % IP_PORT)
+    print('connected to %s' % OPC_IP_PORT)
 else:
     # can't connect, but keep running in case the server appears later
     print('WARNING: could not connect to %s' % IP_PORT)
 
-
 #-------------------------------------------------------------------------------
-# send pixels
-
-print('sending pixels forever (control-c to exit)...')
-
-n_pixels = 512   # number of pixels in the included "wall" layout
-fps = 24         # frames per second
-
+# Number of Pixels, and Frame rate
+n_pixels = args.pixel_count   # number of pixels in the included "wall" layout
+fps = args.fps         # frames per second
 
 #------------------------------------------------------------------------------
 # initialize the values
@@ -89,15 +82,13 @@ queue_b.put(("/1/blue", speed_b, freq_b))
 #------------------------------------------------------------------------------
 # The TouchOSC server
 dispatcher = dispatcher.Dispatcher()
+# Mappings for the controls
+# controls consist of THREE x/y boxes in a TouchOSC interface
 dispatcher.map("/1/red",   queue_r.put)
 dispatcher.map("/1/green", queue_g.put)
 dispatcher.map("/1/blue",  queue_b.put)
-#dispatcher.map("/1/black1", print)
-#dispatcher.map("/1/black2", print)
 
-ip = '172.16.12.168'
-port = 5006
-server = osc_server.ForkingOSCUDPServer((ip, port), dispatcher)
+server = osc_server.ForkingOSCUDPServer((args.listen_ip, args.listen_port), dispatcher)
 server_thread = threading.Thread(target=server.serve_forever)
 
 def render_pixels(queue_r, queue_g, queue_b):
@@ -149,7 +140,9 @@ def render_pixels(queue_r, queue_g, queue_b):
         time.sleep(1 / fps)
 
 
-print("Serving on {}".format(server.server_address))
+print("Listening for OSC on {}".format(server.server_address))
+print("Serving to OPC on {}".format(server.server_address))
+print('control-c to exit...')
 server_thread.start()
 render_thread = threading.Thread(target=render_pixels, args=(queue_r, queue_g, queue_b))
 render_thread.start()
