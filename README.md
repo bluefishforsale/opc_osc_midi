@@ -1,49 +1,35 @@
-openpixelcontrol
+OPC_OSC_MIDI
 ================
 
-A simple stream protocol for controlling RGB lighting, particularly RGB LEDs.
-See http://openpixelcontrol.org/ for a spec.
 
-Using this implementation, you can write your own patterns and animations,
-test them in a simulator, and run them on real RGB light arrays.  This
-repository includes these programs:
-
-* dummy_client: Sends OPC commands for the RGB values that you type in.
-
-* dummy_server: Receives OPC commands from a client and prints them out.
-
-* gl_server (Mac or Linux only): Receives OPC commands from a client and
-  displays the LED pixels in an OpenGL simulator.  Takes a "layout file"
-  that specifies the locations of the pixels in a JSON array; each item
-  in the array should be a JSON object of the form {"point": [x, y, z]}
-  where x, y, z are the coordinates of the pixel in space.
-
-* tcl_server: Receives OPC commands from a client and uses them to
-  control Total Control Lighting pixels (see http://coolneon.com/) that
-  are connected to the SPI port on a Beaglebone.
-
-* python_clients/opc.py: A python library for connecting and sending pixels.
-
-* python_clients/color_utils.py: A python library for manipulating colors.
-
-* python_clients/raver_plaid.py: An example client that sends rainbow patterns.
-
-To build these programs, run "make" and then look in the bin/ directory.
-
-
-Quickstart
+Quick start:
 ----------
 
-Step 1. If you're using Linux, first get the dependencies you need
-(Mac users skip to step 2):
+OS X:
 
-    apt-get install mesa-common-dev freeglut3-dev
+* Install HomeBrew
+  * /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-Step 2. Compile and start the GL simulator using the example "Freespace" layout:
+* Install Python3
+  * pip install python3
 
-    make
-    bin/gl_server -l layouts/freespace.json
+* Install python-osc
+  * pip3 install python-osc
 
-Step 3. Then in another terminal window, send colors to the simulator:
+* Start the openGL server
+  * bin/gl_server -l layouts/512_pts.json 1234
 
-    python_clients/raver_plaid.py
+* Run the pixel generator
+  * python3 ./python_clients/raver_plaid_osc_control.py
+
+Overview:
+----------
+OpenPixelControl is a simple stream protocol for controlling RGB lighting, particularly RGB LEDs.
+See http://openpixelcontrol.org/ for a spec.
+
+OpenSoundControl is a protocol for networking sound synthesizers, computers, and other multimedia devices for purposes such as musical performance or show control.
+
+MIDI is not yet implemented, but will be in the future.
+
+DMX is not yet implemented, but will be in the future.
+
