@@ -92,15 +92,21 @@ def render_pixels(n_pixels, client, start_time):
     global freq_r
     global freq_g
     global freq_b
+    global black_offset_1
+    global black_offset_2
+    global black_period_1
+    global black_period_2
     name = ""
 
     if queue.empty():
         queue.put(('/red', speed_r, freq_r))
         queue.put(('/green', speed_g, freq_g))
         queue.put(('/blue', speed_b, freq_b))
+        queue.put(('/black_offset', black_offset_1, black_offset_2))
+        queue.put(('/black_period', black_period_1, black_period_2))
     else:
         name, speed, freq = queue.get_nowait()
-        print(name, speed, freq)
+        #print(name, speed, freq)
 
     if name is not None:
         if name == '/red':
@@ -109,13 +115,21 @@ def render_pixels(n_pixels, client, start_time):
             speed_g, freq_g = speed, freq
         if name == '/blue':
             speed_b, freq_b = speed, freq
+        if name == '/black_offset':
+            black_offset_1, black_offset_2 = speed, freq
+        if name == '/black_period':
+            black_period_1, black_period_2 = speed, freq
         else:
             speed_r = speed_r
-            freq_r = freq_r
             speed_g = speed_g
-            freq_g = freq_g
             speed_b = speed_b
+            freq_r = freq_r
+            freq_g = freq_g
             freq_b = freq_b
+            black_offset_1 = black_offset_1
+            black_offset_2 = black_offset_2
+            black_period_1 = black_period_1
+            black_period_2 = black_period_2
 
     #print(("%.2f" % t, speed_r, freq_r))
     #print(("%.2f" % t, speed_g, freq_g))
@@ -128,16 +142,16 @@ def render_pixels(n_pixels, client, start_time):
         pct_jittered = (pct * 77 ) % 77
         blackstripes = color_utils.cos(
                 pct_jittered,
-                offset=t*0.05,
-                period=20,
-                minn=-1.0,
-                maxx=2.5)
+                offset = t*black_offset_1,
+                period = black_period_1,
+                minn = -1.0,
+                maxx = 2.5)
         blackstripes_offset = color_utils.cos(
                 t,
-                offset=-0.9,
-                period=60,
-                minn=-1.5,
-                maxx=3)
+                offset = black_offset_2,
+                period = black_period_2,
+                minn = -1.5,
+                maxx = 3)
         blackstripes = color_utils.clamp(
                 blackstripes + blackstripes_offset, 0, 1)
 
@@ -166,8 +180,8 @@ if __name__ == '__main__':
     osc_server.addMsgHandler( "/red",   osc_color_handler)
     osc_server.addMsgHandler( "/green", osc_color_handler)
     osc_server.addMsgHandler( "/blue",  osc_color_handler)
-    osc_server.addMsgHandler( "/black",  osc_color_handler)
     osc_server.addMsgHandler( "/black_offset",  osc_color_handler)
+    osc_server.addMsgHandler( "/black_period",  osc_color_handler)
     osc_server.timeout=0
 
     #------------------------------------------------------------------------------
@@ -178,10 +192,16 @@ if __name__ == '__main__':
     speed_r = 0.01
     speed_g = 0.01
     speed_b = 0.01
+    black_offset_1 = 0.01
+    black_offset_2 = 0.01
+    black_period_1 = 0.01
+    black_period_2 = 0.01
 
     osc_color_handler("/red", 'ff', [freq_r, speed_r])
     osc_color_handler("/green", 'ff', [freq_r, speed_r])
     osc_color_handler("/blue", 'ff', [freq_r, speed_r])
+    osc_color_handler("/black_offset", 'ff', [black_offset_1, black_offset_2])
+    osc_color_handler("/black_period", 'ff', [black_period_1, black_period_2])
 
     print("Listening for OSC on {}".format("%s:%d" % osc_server.server_address))
     print("Connecting to OPC on {}".format(OPC_IP_PORT))
