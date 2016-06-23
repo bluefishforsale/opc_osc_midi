@@ -108,14 +108,15 @@ def pixel_color(t, coord, ii, n_pixels, random_values):
         r, g, b = (2, 0.6, 1.6)
 
     # twinkle occasional LEDs
-    twinkle_speed = 0.07
+    twinkle_speed = 0.06
     twinkle_density = 0.1
     twinkle = (random_values[ii]*7 + time.time()*twinkle_speed) % 1
     twinkle = abs(twinkle*2 - 1)
     twinkle = color_utils.remap(twinkle, 0, 1, -1/twinkle_density, 1.1)
     twinkle = color_utils.clamp(twinkle, -0.5, 1.1)
     twinkle **= 5
-    twinkle *= color_utils.cos(t - ii/n_pixels, offset=0, period=7, minn=0.1, maxx=1.0) ** 20
+    #twinkle *= color_utils.cos(t - ii/n_pixels, offset=0, period=10, minn=0.1, maxx=1.0) ** 20
+    twinkle *= color_utils.cos(t - ii/n_pixels, offset=0, period=10, minn=0.1, maxx=1.0) ** 10
     twinkle = color_utils.clamp(twinkle, -0.3, 1)
     r *= twinkle
     g *= twinkle

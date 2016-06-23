@@ -17,7 +17,7 @@ import time
 import math
 import sys
 
-import opc_client
+import opc
 
 
 #-------------------------------------------------------------------------------
@@ -43,8 +43,7 @@ print
 print '    connecting to server at %s' % IP_PORT
 print
 
-SOCK = opc_client.get_socket(IP_PORT)
-
+client = opc.Client(IP_PORT)
 
 #-------------------------------------------------------------------------------
 # send pixels
@@ -52,7 +51,7 @@ SOCK = opc_client.get_socket(IP_PORT)
 print '    sending pixels forever (control-c to exit)...'
 print
 
-n_pixels = 1250  # number of pixels in the included "wall" layout
+n_pixels = 512  # number of pixels in the included "wall" layout
 fps = 2         # frames per second (color switches every frame)
 
 while True:
@@ -64,6 +63,6 @@ while True:
         rgb = tuple(rgb)
         for ii in range(n_pixels):
             pixels.append(rgb)
-        opc_client.put_pixels(SOCK, 0, pixels)
+        client.put_pixels(pixels, 0)
         time.sleep(1 / fps)
 
