@@ -3,7 +3,7 @@
 """A demo client for Open Pixel Control
 http://github.com/zestyping/openpixelcontrol
 
-Creates moving blobby colors with sparkles on top.
+Creates moving blobby colors.
 
 To run:
 First start the gl simulator using, for example, the included "wall" layout
@@ -13,7 +13,7 @@ First start the gl simulator using, for example, the included "wall" layout
 
 Then run this script in another shell to send colors to the simulator
 
-    python_clients/miami.py --layout layouts/wall.json
+    python_clients/lava_lamp.py --layout layouts/wall.json
 
 """
 
@@ -27,7 +27,7 @@ try:
 except ImportError:
     import simplejson as json
 
-import opc 
+import opc
 import color_utils
 
 
@@ -111,29 +111,22 @@ def pixel_color(t, coord, ii, n_pixels, random_values):
 #         z += ((ii*147)%7) / n_pixels * 44.34 + 0.1
 
     # make x, y, z -> r, g, b sine waves
-    r = color_utils.cos(x, offset=t / 4, period=2.5, minn=0, maxx=1)
-    g = color_utils.cos(y, offset=t / 4, period=2.5, minn=0, maxx=1)
-    b = color_utils.cos(z, offset=t / 4, period=2.5, minn=0, maxx=1)
-    r, g, b = color_utils.contrast((r, g, b), 0.5, 1.4)
-
-    clampdown = (r + g + b)/2
-    clampdown = color_utils.remap(clampdown, 0.4, 0.5, 0, 1)
-    clampdown = color_utils.clamp(clampdown, 0, 1)
-    clampdown *= 0.9
-    r *= clampdown
-    g *= clampdown
-    b *= clampdown
+    r = color_utils.cos(x, offset=t / 4, period=2, minn=0, maxx=1)
+    g = color_utils.cos(y, offset=t / 4, period=2, minn=0, maxx=1)
+    b = color_utils.cos(z, offset=t / 4, period=2, minn=0, maxx=1)
+    r, g, b = color_utils.contrast((r, g, b), 0.5, 1.5)
+#     r, g, b = color_utils.clip_black_by_luminance((r, g, b), 0.5)
 
 #     # shift the color of a few outliers
 #     if random_values[ii] < 0.03:
 #         r, g, b = b, g, r
 
     # black out regions
-    r2 = color_utils.cos(x, offset=t / 10 + 12.345, period=4, minn=0, maxx=1)
-    g2 = color_utils.cos(y, offset=t / 10 + 24.536, period=4, minn=0, maxx=1)
-    b2 = color_utils.cos(z, offset=t / 10 + 34.675, period=4, minn=0, maxx=1)
+    r2 = color_utils.cos(x, offset=t / 10 + 12.345, period=3, minn=0, maxx=1)
+    g2 = color_utils.cos(y, offset=t / 10 + 24.536, period=3, minn=0, maxx=1)
+    b2 = color_utils.cos(z, offset=t / 10 + 34.675, period=3, minn=0, maxx=1)
     clampdown = (r2 + g2 + b2)/2
-    clampdown = color_utils.remap(clampdown, 0.2, 0.3, 0, 1)
+    clampdown = color_utils.remap(clampdown, 0.8, 0.9, 0, 1)
     clampdown = color_utils.clamp(clampdown, 0, 1)
     r *= clampdown
     g *= clampdown
@@ -142,33 +135,6 @@ def pixel_color(t, coord, ii, n_pixels, random_values):
     # color scheme: fade towards blue-and-orange
 #     g = (r+b) / 2
     g = g * 0.6 + ((r+b) / 2) * 0.4
-
-#     # stretched vertical smears
-#     v = color_utils.cos(ii / n_pixels, offset=t*0.1, period = 0.07, minn=0, maxx=1) ** 5 * 0.3
-#     r += v
-#     g += v
-#     b += v
-
-    # fade behind twinkle
-    fade = color_utils.cos(t - ii/n_pixels, offset=0, period=7, minn=0, maxx=1) ** 20
-    fade = 1 - fade*0.2
-    r *= fade
-    g *= fade
-    b *= fade
-
-    # twinkle occasional LEDs
-    twinkle_speed = 0.7
-    twinkle_density = 0.3
-    twinkle = (random_values[ii]*7 + time.time()*twinkle_speed) % 1
-    twinkle = abs(twinkle*2 - 1)
-    twinkle = color_utils.remap(twinkle, 0, 1, -1/twinkle_density, 1.1)
-    twinkle = color_utils.clamp(twinkle, -0.5, 1.1)
-    twinkle **= 5
-    twinkle *= color_utils.cos(t - ii/n_pixels, offset=0, period=7, minn=0, maxx=1) ** 20
-    twinkle = color_utils.clamp(twinkle, -0.3, 1)
-    r += twinkle
-    g += twinkle
-    b += twinkle
 
     # apply gamma curve
     # only do this on live leds, not in the simulator

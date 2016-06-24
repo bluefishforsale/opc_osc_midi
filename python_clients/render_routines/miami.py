@@ -157,8 +157,8 @@ def pixel_color(t, coord, ii, n_pixels, random_values):
     b *= fade
 
     # twinkle occasional LEDs
-    twinkle_speed = 0.7
-    twinkle_density = 0.3
+    twinkle_speed = 0.07
+    twinkle_density = 0.1
     twinkle = (random_values[ii]*7 + time.time()*twinkle_speed) % 1
     twinkle = abs(twinkle*2 - 1)
     twinkle = color_utils.remap(twinkle, 0, 1, -1/twinkle_density, 1.1)
