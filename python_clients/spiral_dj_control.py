@@ -91,7 +91,7 @@ def main():
 
     all_inputs = color_inputs + control_inputs
     DEFAULT_COLOR_PARAM = 1.51
-    DEFAULT_CONTROL_PARAM = 0.5
+    DEFAULT_CONTROL_PARAM = 1.0
     osc_handler = mypartial(osc_color_handler, cmd_queue=command_queue)
     # register all osc_inputs as OSC handlers
     for color_input in color_inputs:
@@ -203,17 +203,21 @@ def render_pixels(n_pixels, frame_time, osc_inputs, control_dict):
             return blackstripes * color_utils.remap(
                 math.cos((
                     frame_time/params[0] + pct*params[1])*math.pi*2),
-                -1, 1, 0, 256)
+                -1, 1, 0, 255)
 
         # 3 sine waves for r, g, b which are out of sync with each other
-        r = num_clamp(color_stripe(red_params)   * control_dict["/RedLevel"]   * brightness, 0, 255)
-        g = num_clamp(color_stripe(green_params) * control_dict["/GreenLevel"] * brightness, 0, 255)
-        b = num_clamp(color_stripe(blue_params)  * control_dict["/BlueLevel"]  * brightness, 0, 255)
+        r = num_clamp(color_stripe(red_params)   * control_dict["/RedLevel"]   * brightness, 0.0001, 255.0)
+        g = num_clamp(color_stripe(green_params) * control_dict["/GreenLevel"] * brightness, 0.0001, 255.0)
+        b = num_clamp(color_stripe(blue_params)  * control_dict["/BlueLevel"]  * brightness, 0.0001, 255.0)
 
         # allow for HSV modifications
-        h, s, v = colorutils.rgb_to_hsv((r, g, b))
-        s = num_clamp(s * saturation, 0, 1)
-        r, g, b = colorutils.hsv_to_rgb((h, s, v))
+        try:
+            h, s, v = colorutils.rgb_to_hsv((r, g, b))
+            s = num_clamp(s * saturation, 0.00001, 1.0)
+            r, g, b = colorutils.hsv_to_rgb((h, s, v))
+        except:
+            pass
+            #print((r, g, b), (h, s, v))
 
 
         pixels.append((r, g, b))

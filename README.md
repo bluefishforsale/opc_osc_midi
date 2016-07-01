@@ -10,24 +10,28 @@ OS X:
 * Install HomeBrew
   * /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-* Install Python3
-  * pip install python3
-
-* Install python-osc
+* Install the extra python modules via pip
   * pip3 install python-osc
+  * pip3 install colorutils
 
 * Start the openGL server
-  * bin/gl_server -l layouts/512_pts.json 1234
+  * ./bin/gl_server -l layouts/512_pts.json 1234
 
 * Run the pixel generator
-  * python3 ./python_clients/raver_plaid_osc_control.py
+  * ./python_clients/spiral_dj_control.py --listen_ip <your ip>
 
-Overview:
+* Use the TouchOSC client to load the layout
+  * DJ Spiral Control.touchosc
+
+
+What each part does:
 ----------
 OpenPixelControl is a simple stream protocol for controlling RGB lighting, particularly RGB LEDs.
 See http://openpixelcontrol.org/ for a spec.
 
 OpenSoundControl is a protocol for networking sound synthesizers, computers, and other multimedia devices for purposes such as musical performance or show control.
+
+TouchOSC is used on android or IOS devices to
 
 MIDI is not yet implemented, but will be in the future.
 
