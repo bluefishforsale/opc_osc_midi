@@ -84,7 +84,7 @@ def main():
 # need to enrich pixel server's color control model to handle these
 #    osc_server.addMsgHandler( "/black",  osc_handler)
 #    osc_server.addMsgHandler( "/black_offset",  osc_handler)
-    osc_server.timeout = 0
+    osc_server.timeout = 0.001
 
     print("Listening for OSC on {}".format("%s:%d" % osc_server.server_address))
     print('control-c to exit...')

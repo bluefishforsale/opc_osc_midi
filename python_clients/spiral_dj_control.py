@@ -59,7 +59,8 @@ def main():
     # pyOSC module implementation
     osc_server = OSC.OSCServer((args.listen_ip, args.listen_port))
     osc_server.addDefaultHandlers()
-    osc_server.timeout=0
+    osc_server.timeout=0.0001
+    #osc_server.timeout=0
     print("Listening for OSC on {}".format("%s:%d" % osc_server.server_address))
     print("Connecting to OPC on {}".format(OPC_IP_PORT))
     print('control-c to exit...')
@@ -146,18 +147,15 @@ def osc_color_handler(path, tags, data, source, cmd_queue):
     # tags will contain 'fff'
     # args is a OSCMessage with data
     # source is where the message came from (in case you need to reply)
-    #print(path, data)
-    cmd_queue.put_nowait((path, data))
+    cmd_queue.put((path, data))
 
 
 # convert OSC messages in the queue to values in a dictionary
 def queue_to_dict(cmd_queue, cmd_dict, osc_inputs):
     try:
-        name, value = cmd_queue.get_nowait()
-        #print(name, value)
+        name, value = cmd_queue.get(timeout=0.00001)
         if name in osc_inputs:
             cmd_dict[name] = value[0]
-            #pprint(cmd_dict)
     except Empty:
         pass
     return cmd_dict
@@ -173,10 +171,6 @@ def render_pixels(n_pixels, frame_time, osc_inputs, control_dict):
     rgb_params   = control_dict["/RedLevel"], control_dict["/GreenLevel"], control_dict["/BlueLevel"]
     saturation   = control_dict["/Saturation"]
     brightness   = control_dict["/LeftBright"]
-
-    #print rgb_params
-    #for thing in black_params, red_params, green_params, blue_params:
-        #pprint(thing)
 
     for i in range(n_pixels):
         pct = i / n_pixels
@@ -219,9 +213,7 @@ def render_pixels(n_pixels, frame_time, osc_inputs, control_dict):
             pass
             #print((r, g, b), (h, s, v))
 
-
         pixels.append((r, g, b))
-
     return pixels
 
 
